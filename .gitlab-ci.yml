@@ -1,0 +1,28 @@
+compile_2:
+  script: echo "Hello, Rules!"
+  rules:
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/
+      changes:
+        - Dockerfile
+      when: manual
+      allow_failure: true
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - when: never
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: "30 days"
+    paths:
+      - ./hello/
+  needs:
+    - deploy # needs deploy job to be executed first and then get its artifacts
+    # or needs deploy job to be executed first but doesnt need its artifacts
+    - job: deploy
+      artifacts: false
+  dependencies:
+    - compile_1 # will download only compile_1 artifacts
+    - compile_0 # and compile_0 artifacts
+    # or dependencies: [] for no artifacts to be downloaded
